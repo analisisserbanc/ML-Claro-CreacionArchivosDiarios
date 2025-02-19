@@ -1,0 +1,6 @@
+boto3==1.36.18
+MySQL-python==1.2.5
+numpy==2.2.3
+pandas==2.2.3
+python_dateutil==2.9.0.post0
+PyYAML==6.0.2
