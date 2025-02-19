@@ -1,0 +1,5 @@
+servidores:
+  72:
+    usuario: "nombre_usuario" # Colocar nombre de usuario correspondiente
+    password: "contraseña" # Colocar contraseña correspondiente
+    default_database: "CLARO"

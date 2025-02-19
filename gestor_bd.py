@@ -1,26 +1,45 @@
+import yaml
 import MySQLdb
+import warnings
 import pandas as pd
+from pathlib import Path
 
-def connect_to_database(servidor:int = 23, database:str = None) -> MySQLdb:
-    credenciales = {23 : "33+O4O$*9=oV", 72 : 'JO.,2024me'}
+warnings.filterwarnings("ignore")
 
-    if database is None:
-        lista_databases = {23: "report_cartera", 72: "CLARO"}
-        database = lista_databases[servidor]
 
-    contraseña = credenciales[servidor]
+def cargar_credenciales():
+    """Carga las credenciales desde el archivo YAML."""
+    ruta_config = Path("config_credenciales.yaml")
+    if not ruta_config.exists():
+        raise FileNotFoundError("El archivo config_credenciales.yaml no existe. Por favor, créalo y define los servidores.")
 
+    with open(ruta_config, "r", encoding="utf-8") as file:
+        config = yaml.safe_load(file)
+    
+    return config.get("servidores", {})
+
+def connect_to_database(servidor: int, database: str = None):
+    """Conecta a la base de datos usando las credenciales definidas en el YAML."""
+    servidores = cargar_credenciales()
+
+    if servidor not in servidores:
+        raise ValueError(f"No hay credenciales definidas para el servidor {servidor}. Agregue la configuración en config_credenciales.yaml.")
+
+    credenciales = servidores[servidor]
+    
     config = {
-        'host': f'172.16.10.{servidor}',
-        'user': 'jriquelme',
-        'password': contraseña,
-        'database': database,
-        'port': 3306,
-        'charset': 'utf8mb4',
-        'connect_timeout': 1800,
-        'local_infile':1 
+        "host": f"172.16.10.{servidor}",
+        "user": credenciales["usuario"],
+        "password": credenciales["password"],
+        "database": database or credenciales["default_database"],
+        "port": 3306,
+        "charset": "utf8mb4",
+        "connect_timeout": 1800,
+        "local_infile": 1,
     }
-    return MySQLdb.connect(**config)    
+
+    return MySQLdb.connect(**config)
+
 
 def consulta_a_df(consulta:str, servidor:int = 23, database:str = 'report_cartera'):
     consulta = consulta.replace("\n"," ").replace("          "," ").replace("     ", " ").replace("     ", " ").replace("    "," ").replace("   ", " ")

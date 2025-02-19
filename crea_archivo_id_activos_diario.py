@@ -24,13 +24,15 @@ output_dir = Path(config['paths']['output_dir'])
 #                           Funciones Principales
 # ========================================================================
 
-def extrae_df ():
+def extrae_df (fecha_proceso):
     
-    consulta = """
+    consulta = f"""
         SELECT DISTINCT
         CAST(SUBSTRING_INDEX(RUT, '-', 1) AS INT) AS fld_cli
         FROM STOCK 
-        WHERE SCMO_ESTADO = 'ACTIVO'
+        WHERE 
+            SCMO_ESTADO = 'ACTIVO' 
+            AND FECHA_PROCESO < CAST('{fecha_proceso}' AS DATE)
     """
     
     df = consulta_a_df(consulta, servidor = 72, database = "CLARO")
@@ -67,9 +69,7 @@ def genera_estructura_archivo(df:pd.DataFrame):
     
     return df
     
-def guarda_archivo(df:pd.DataFrame):
-    fecha_carga = datetime.now().strftime("%Y%m%d")
-    
+def guarda_archivo(df:pd.DataFrame, fecha_carga:str):   
     # Separar y guardar registros   
     nombre_archivo = f"id_activos_{fecha_carga}.csv"
     
@@ -89,37 +89,41 @@ def sube_archivo(ruta_archivo:Path):
 #                           Procesamiento Principal
 # ========================================================================
 
-def crea_archivo_id_activos():
+def crea_archivo_id_activos(fecha_proceso:str = None):
     # ========================================================================
     #                             Extrae DF
-    # ========================================================================   
+    # ========================================================================
+    if fecha_proceso is None:
+        fecha_proceso = datetime.now().strftime("%Y%m%d")  
+    
 
-    df = extrae_df()
+    df = extrae_df(fecha_proceso)
+    
+    if not df.empty:
+        # ========================================================================
+        #                            Anonimización
+        # ========================================================================
+        
+        df = anonimizacion_rut(df)
 
-    # ========================================================================
-    #                            Anonimización
-    # ========================================================================
-    
-    df = anonimizacion_rut(df)
+        # ========================================================================
+        #                            Nueva Estructura
+        # ========================================================================
+        
+        df = genera_estructura_archivo(df)
+        
+        # ========================================================================
+        #                           Guardar Archivo en CSV
+        # ========================================================================
+        
+        ruta_archivo = guarda_archivo(df, fecha_proceso)
 
-    # ========================================================================
-    #                            Nueva Estructura
-    # ========================================================================
-    
-    df = genera_estructura_archivo(df)
-    
-    # ========================================================================
-    #                           Guardar Archivo en CSV
-    # ========================================================================
-    
-    ruta_archivo = guarda_archivo(df)
-
-    # ========================================================================
-    #                           Sube Archivo a Bucket
-    # ========================================================================
-    
-    
-    sube_archivo(ruta_archivo)
+        # ========================================================================
+        #                           Sube Archivo a Bucket
+        # ========================================================================
+        
+        
+        sube_archivo(ruta_archivo)
 
 # ========================================================================
 #                             Ejecutable
