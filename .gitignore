@@ -1,0 +1,6 @@
+*.csv
+*pycache*
+*.ipynb
+/build
+/dist
+/Salidas

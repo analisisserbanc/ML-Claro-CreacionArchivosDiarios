@@ -1,0 +1,11 @@
+credentials:
+  file: 'masanalytics_s3_credentials.json'
+  prefix: '1_Carga/'
+
+# Bucket en Productivo: rm-serbancclaro-datalake-prod
+# Bucket de Carga Inicial: dc-serbanc-datalake-prod
+storage:
+  bucket_name: 'rm-serbancclaro-datalake-prod'
+
+paths:
+  output_dir: 'Salidas'
