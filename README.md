@@ -9,7 +9,7 @@ A continuación, se detallan los archivos y directorios principales del reposito
 * `anonimizacion_rut.py`: Contiene funciones para anonimizar los RUTs presentes en los datos.
 * `cargar_archivos_bucket.py`: Maneja la carga de los archivos generados al bucket de S3.
 * `config.yaml`: Archivo de configuración con parámetros utilizados por los scripts.
-* `config_credenciales.yaml`: Archivo que almacena las credenciales necesarias para la conexión con S3.
+* `config_credenciales.yaml`: Archivo que almacena las credenciales necesarias para la conexión con S3 y las bases de datos del servidor.
 * `crea_archivo_asignacion_diario.py`: Genera el archivo diario de asignaciones.
 * `crea_archivo_gestiones_diario.py`: Genera el archivo diario de gestiones.
 * `crea_archivo_id_activos_diario.py`: Genera el archivo diario de IDs activos.
@@ -28,4 +28,15 @@ Antes de ejecutar los scripts, asegúrese de tener instaladas las siguientes dep
 * Python 3.x
 * Bibliotecas adicionales listadas en `requirements.txt` (si corresponde)
 
-Además, es necesario contar con el archivo `config_credenciales.yaml` en el directorio raíz del proyecto. Este archivo debe contener las credenciales necesarias para cargar los archivos generados en el bucket de S3.
+Además, es necesario contar con el archivo `config_credenciales.yaml` en el directorio raíz del proyecto. Este archivo debe contener las credenciales necesarias para cargar los archivos generados en el bucket de S3, y también las credenciales apropiadas para la interacción con las bases de datos del servidor.
+
+## Configuración de Credenciales
+
+El archivo `config_credenciales.yaml` debe estructurarse de la siguiente manera:
+
+```yaml
+servidores:
+  72:
+    usuario: "nombre_usuario" # Colocar nombre de usuario correspondiente
+    password: "contraseña" # Colocar contraseña correspondiente
+    default_database: "CLARO"
