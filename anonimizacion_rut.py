@@ -6,8 +6,8 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime
 from funciones_estandar import clear_screen
-from funciones_estandar import consulta_a_df
-from funciones_estandar import carga_tabla_desde_df
+from gestor_bd import consulta_a_df
+from gestor_archivos import carga_tabla_desde_df
 
 # ========================================================================
 #                               Constantes
