@@ -5,7 +5,6 @@
 import yaml
 import pandas as pd
 from pathlib import Path
-from funciones_estandar import clear_screen
 from funciones_estandar import consulta_a_df
 from anonimizacion_rut import extrae_rut_a_ingresar, carga_rut, extrae_info_bd
 from cargar_archivos_bucket import cargar_archivo_en_s3
@@ -21,7 +20,7 @@ output_dir = Path(config['paths']['output_dir'])
 #                          Funciones Auxiliares
 # ========================================================================
 
-def construye_consulta_pagos(cartera:str, fecha_carga:str):
+def construye_consulta_pagos(cartera:str, fecha_inicio:str, fecha_fin:str):
     base = "CLARO"
     tabla = f"TABPAGO_{cartera}"
 
@@ -40,23 +39,47 @@ def construye_consulta_pagos(cartera:str, fecha_carga:str):
     WHERE
         CAST(SUBSTRING_INDEX(RUT,'-',1) AS INT) > 0  
         AND CAST(CAPITAL AS INT) > 0 
-        AND FECHA_CARGA = CAST('{fecha_carga}' AS DATE)
+        AND FECHA_CARGA BETWEEN CAST('{fecha_inicio}' AS DATE) AND CAST('{fecha_fin}' AS DATE)
     ;
     """  
     
     return consulta
-
+   
 # ========================================================================
 #                           Funciones Principales
-# ========================================================================
+# ======================d==================================================
 
-def extrae_df_pagos(fecha_carga:str):
+def obtener_rango_fechas(fecha_entrada:str = None):
+    # Si se ingresó un parámetro de fecha, se tiene que corroborar que ese parametro sea realmente una fecha (Se tiene que retornar un datetime)
+    if fecha_entrada is not None:
+        
+        año = int(fecha_entrada[:4])
+        mes = int(fecha_entrada[4:6])
+        dia = int(fecha_entrada[6:])
+
+        fecha_fin = datetime(año, mes, dia)
+   
+    # Si no se ingresó ninguna fecha, eso quiere decir que se va a extraer la data hasta el ultimo dia del periodo actual (Hoy)
+    
+    else:
+        fecha_fin = datetime.now()
+    
+    
+    # Lo previo establece la fecha_fin
+    fecha_inicio = fecha_fin.replace(day = 1)
+    
+    fecha_inicio_str = fecha_inicio.strftime('%Y%m%d')
+    fecha_fin_str = fecha_fin.strftime('%Y%m%d')
+    
+    return fecha_inicio_str, fecha_fin_str
+    
+def extrae_df_pagos(fecha_inicio:str, fecha_fin:str):
     
     CARTERAS = ["PREVENTIVA", "MORA", "CASTIGO"]
     dfs = []
         
     for cartera in CARTERAS:
-        consulta = construye_consulta_pagos(cartera, fecha_carga)
+        consulta = construye_consulta_pagos(cartera, fecha_inicio, fecha_fin)
         df = consulta_a_df(consulta, servidor=72, database="CLARO")    
         dfs.append(df)
     
@@ -123,20 +146,23 @@ def sube_archivo(ruta_archivo:Path):
 
 def crea_archivo_pagos(fecha_carga:str = None):
     # ========================================================================
+    #                        Valida y Extrae Fechas
+    # ========================================================================
+    
+    fecha_inicio, fecha_fin = obtener_rango_fechas(fecha_carga)
+
+    # ========================================================================
     #                             Extrae DF Pagos
-    # ========================================================================   
-    if fecha_carga is None:
-        fecha_carga = (datetime.now() - timedelta(days=1)).strftime('%Y%m%d')
+    # ======================================================================== 
 
-
-    df = extrae_df_pagos(fecha_carga)
+    df = extrae_df_pagos(fecha_inicio, fecha_fin )
     
     if not df.empty:
 
         # ========================================================================
         #                            Anonimización
         # ========================================================================
-        
+
         df = anonimizacion_rut(df)
 
         # ========================================================================
@@ -149,7 +175,7 @@ def crea_archivo_pagos(fecha_carga:str = None):
         #                           Guardar Archivo en CSV
         # ========================================================================
         
-        ruta_archivo = guarda_archivo(fecha_carga, df)
+        ruta_archivo = guarda_archivo(fecha_fin, df)
 
         # ========================================================================
         #                           Sube Archivo a Bucket
@@ -160,11 +186,7 @@ def crea_archivo_pagos(fecha_carga:str = None):
 # ========================================================================
 #                             Ejecutable
 # ========================================================================
-
-def main():
-    clear_screen()
-    crea_archivo_pagos()
     
 if __name__ == "__main__":
-    main()
+    crea_archivo_pagos()
 

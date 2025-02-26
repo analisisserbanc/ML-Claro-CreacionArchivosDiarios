@@ -1,7 +1,9 @@
-*.csv
-*pycache*
-*.ipynb
 /build
 /dist
 /Salidas
+/venv
+*pycache*
 *.json
+*.csv
+*.ipynb
+config_credenciales.yaml

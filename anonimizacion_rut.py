@@ -30,7 +30,8 @@ def extrae_info_bd() -> pd.DataFrame:
         pd.DataFrame: DataFrame con los datos extraídos de la base de datos.
     """
     consulta = f"SELECT * FROM {TABLA_HOMOLOGACION}"
-    return consulta_a_df(consulta)
+    df = consulta_a_df(consulta)
+    return df
 
 def extrae_rut_a_ingresar(lista_rut: list) -> list:
     """

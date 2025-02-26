@@ -2,8 +2,10 @@ from crea_archivo_gestiones_diario import generar_archivo_gestiones
 from crea_archivo_pagos_dia import crea_archivo_pagos
 from crea_archivo_asignacion_diario import crea_archivo_asignacion
 from crea_archivo_id_activos_diario import crea_archivo_id_activos
+from funciones_estandar import clear_screen
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+import argparse
 
 def generar_dias_mes_periodo(periodo: int) -> list[str]:
     año = int(str(periodo)[:4])
@@ -25,19 +27,36 @@ def generar_dias_mes_periodo(periodo: int) -> list[str]:
         
     return dias
 
-def procesa_periodo(periodo:int):
+def procesa_periodo(periodo: int, archivo: str = "todos"):
+    clear_screen()
     lista_dias = generar_dias_mes_periodo(periodo)
+       
+    for dia in lista_dias:
+        
+        if archivo in ["gestiones", "todos"]:
+            generar_archivo_gestiones(dia)
+        if archivo in ["pagos", "todos"]:
+            crea_archivo_pagos(dia)
+        if archivo in ["asignacion", "todos"]:
+            crea_archivo_asignacion(dia)
+        if archivo in ["id_activos", "todos"]:
+            crea_archivo_id_activos(dia)
     
-    for dia in lista_dias:   
-        generar_archivo_gestiones(dia)
-        crea_archivo_pagos(dia)
-        crea_archivo_asignacion(dia)
-        crea_archivo_id_activos(dia)
+def validar_periodo(valor):
+    """Verifica que el período tenga exactamente 6 dígitos y sea un número entero en formato yyyymm."""
+    if not valor.isdigit() or len(valor) != 6:
+        raise argparse.ArgumentTypeError("El período debe ser un número entero de 6 dígitos en formato yyyymm.")
     
-def main():
-    procesa_periodo(202502)
-
-
+    return int(valor)  # Convertimos a entero si pasa la validación
+    
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Procesa un período y genera archivos.")
+    
+    parser.add_argument("periodo", type=int, help="Período en formato yyyymm (ejemplo: 202402)")
+    parser.add_argument("--archivo", choices=["gestiones", "pagos", "asignacion", "id_activos", "todos"],
+                        default="todos", help="Tipo de archivo a generar (por defecto genera todos)")
+
+    args = parser.parse_args()
+    
+    procesa_periodo(args.periodo, args.archivo)

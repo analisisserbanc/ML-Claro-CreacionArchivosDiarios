@@ -343,6 +343,5 @@ def crea_archivo_asignacion(fecha_proceso:str = None):
 
 if __name__ == "__main__":
     clear_screen()
-
-    crea_archivo_asignacion(202501)
+    crea_archivo_asignacion()
     
