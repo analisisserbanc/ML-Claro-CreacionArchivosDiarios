@@ -31,6 +31,10 @@ def extrae_info_bd() -> pd.DataFrame:
     """
     consulta = f"SELECT * FROM {TABLA_HOMOLOGACION}"
     df = consulta_a_df(consulta)
+
+    if df is None or df.empty:
+        return pd.DataFrame()
+    
     return df
 
 def extrae_rut_a_ingresar(lista_rut: list) -> list:
