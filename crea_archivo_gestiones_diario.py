@@ -140,6 +140,25 @@ def extrae_gestiones(dia_gestion:str):
     
     return df_gestiones
 
+def obtener_ultimo_dia_gestion_periodo(periodo):
+    consulta_ultimo_dia = f"""
+        SELECT MAX(GESFEG) AS ultimo_dia
+        FROM COBGES
+        WHERE 
+            GESFEG >= CAST('{periodo}01'  AS DATE)
+            AND GESCOD NOT IN (1020, 1407, 1420, 1425, 1476, 1477, 1528, 1802)
+    """
+    
+    df_resultado = consulta_a_df(consulta_ultimo_dia, servidor=72, database="CLARO")
+    
+    if df_resultado is not None and not df_resultado.empty:
+        ultimo_dia = pd.to_datetime(df_resultado.loc[0, 'ultimo_dia'])
+        return ultimo_dia.strftime("%Y%m%d")
+    else:
+        debug_print("No se encontró ningún día de gestión.")
+        return None
+
+
 def extraccion_tablas_homologacion():
     debug_print(f"Extraccion de Tablas de Homologacion...", end="\r")
     inicio = time.time()
@@ -370,81 +389,83 @@ def generar_archivo_gestiones(dia_gestion:str = None):
 
     df_gestiones =  extrae_gestiones(dia_gestion)
     
-    if not df_gestiones.empty:
+    if df_gestiones.empty:
+        periodo = (datetime.now() - timedelta(days=1)).strftime("%Y%m")
+        dia_gestion = obtener_ultimo_dia_gestion_periodo(periodo)
+        df_gestiones =  extrae_gestiones(dia_gestion)
+    # ========================================================================
+    #                       Extrae Base de Anonimizacion
+    # ========================================================================
 
-        # ========================================================================
-        #                       Extrae Base de Anonimizacion
-        # ========================================================================
+    df_rut_homologados = extrae_base_anonimizacion(df_gestiones)
 
-        df_rut_homologados = extrae_base_anonimizacion(df_gestiones)
+    # ========================================================================
+    #                     Extracción de Tablas de Homologación
+    # ========================================================================
 
-        # ========================================================================
-        #                     Extracción de Tablas de Homologación
-        # ========================================================================
+    df_tbgescod, df_tbgestion2, df_tbgestion3 = extraccion_tablas_homologacion()
 
-        df_tbgescod, df_tbgestion2, df_tbgestion3 = extraccion_tablas_homologacion()
+    # ========================================================================
+    #                                Combina Tablas
+    # ========================================================================
+    
+    df = combinar_datos(
+        df_gestiones, df_rut_homologados, df_tbgescod, df_tbgestion2, df_tbgestion3
+    )
 
-        # ========================================================================
-        #                                Combina Tablas
-        # ========================================================================
-        
-        df = combinar_datos(
-            df_gestiones, df_rut_homologados, df_tbgescod, df_tbgestion2, df_tbgestion3
-        )
+    # ========================================================================
+    #                             Añade Columna Detalle    
+    # ========================================================================
 
-        # ========================================================================
-        #                             Añade Columna Detalle    
-        # ========================================================================
+    df = añade_columna_detalle(df)
 
-        df = añade_columna_detalle(df)
+    # ========================================================================
+    #                             Recategorizando BOT    
+    # ========================================================================
+    
+    df = recategoriza_bot(df)
 
-        # ========================================================================
-        #                             Recategorizando BOT    
-        # ========================================================================
-        
-        df = recategoriza_bot(df)
+    # ========================================================================
+    #                       Clasifica Contactos Excepcionales    
+    # ========================================================================
 
-        # ========================================================================
-        #                       Clasifica Contactos Excepcionales    
-        # ========================================================================
+    df = reclasifica_contacto_excepcion(df)
 
-        df = reclasifica_contacto_excepcion(df)
+    # ========================================================================
+    #                             Clasifica Respuestas  
+    # ========================================================================
 
-        # ========================================================================
-        #                             Clasifica Respuestas  
-        # ========================================================================
+    df = crea_columna_respuesta(df)
 
-        df = crea_columna_respuesta(df)
+    # ========================================================================
+    #                          Añade columna tipo_contacto
+    # ========================================================================
 
-        # ========================================================================
-        #                          Añade columna tipo_contacto
-        # ========================================================================
+    df = añade_columna_tipo_contacto(df)
 
-        df = añade_columna_tipo_contacto(df)
+    # ========================================================================
+    #                       Clasifica Tipo Contactos Excepcionales
+    # ========================================================================
+    
+    df = reclasifica_tipo_contacto_excepcion(df)
 
-        # ========================================================================
-        #                       Clasifica Tipo Contactos Excepcionales
-        # ========================================================================
-        
-        df = reclasifica_tipo_contacto_excepcion(df)
+    # ========================================================================
+    #                          Crea Estructura de Archivo
+    # ========================================================================
 
-        # ========================================================================
-        #                          Crea Estructura de Archivo
-        # ========================================================================
+    df = crea_estructura_archivo(df)
 
-        df = crea_estructura_archivo(df)
+    # ========================================================================
+    #                              Guarda Archivo
+    # ========================================================================
+                
+    ruta_archivo = guardar_resultados(df, dia_gestion)
 
-        # ========================================================================
-        #                              Guarda Archivo
-        # ========================================================================
-                    
-        ruta_archivo = guardar_resultados(df, dia_gestion)
-
-        # ========================================================================
-        #                              Subir Archivo
-        # ========================================================================
-        
-        sube_archivo(ruta_archivo)
+    # ========================================================================
+    #                              Subir Archivo
+    # ========================================================================
+    
+    sube_archivo(ruta_archivo)
         
 
 if __name__ == "__main__":

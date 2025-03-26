@@ -274,7 +274,7 @@ def guardar_archivo(fecha_proceso:str, resultado_df:pd.DataFrame):
     ruta_final.parent.mkdir(parents=True, exist_ok=True)
     
     
-    resultado_df.to_csv(ruta_final, sep=";", index=False)
+    resultado_df.to_csv(ruta_final, sep="|", index=False)
     print(f"Archivo {nombre_archivo} generado.")
     
     return ruta_final
