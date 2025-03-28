@@ -6,10 +6,13 @@ from pathlib import Path
 
 warnings.filterwarnings("ignore")
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+CONFIG_PATH = BASE_DIR / 'config' 
+
 
 def cargar_credenciales():
     """Carga las credenciales desde el archivo YAML."""
-    ruta_config = Path("config_credenciales.yaml")
+    ruta_config = CONFIG_PATH / "config_credenciales.yaml"
     if not ruta_config.exists():
         raise FileNotFoundError("El archivo config_credenciales.yaml no existe. Por favor, créalo y define los servidores.")
 
@@ -131,3 +134,6 @@ def carga_datos_desde_csv(ruta_archivo, tabla, limpiar: bool = False, servidor: 
     finally:
         cursor.close()
         conn.close()
+
+if __name__ == "__main__":
+    connect_to_database(23, "report_cartera")

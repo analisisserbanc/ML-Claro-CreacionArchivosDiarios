@@ -1,8 +1,8 @@
-from crea_archivo_gestiones_diario import generar_archivo_gestiones
-from crea_archivo_pagos_dia import crea_archivo_pagos
-from crea_archivo_asignacion_diario import crea_archivo_asignacion
-from crea_archivo_id_activos_diario import crea_archivo_id_activos
-from funciones_estandar import clear_screen
+from scripts.crea_archivo_gestiones_diario import generar_archivo_gestiones
+from scripts.crea_archivo_pagos_dia import crea_archivo_pagos
+from scripts.crea_archivo_asignacion_diario import crea_archivo_asignacion
+from scripts.crea_archivo_id_activos_diario import crea_archivo_id_activos
+from core.funciones_estandar import clear_screen
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import argparse

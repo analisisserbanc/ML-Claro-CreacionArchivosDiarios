@@ -4,10 +4,9 @@
 
 import pandas as pd
 from pathlib import Path
-from datetime import datetime
-from funciones_estandar import clear_screen
-from gestor_bd import consulta_a_df
-from gestor_archivos import carga_tabla_desde_df
+from core.funciones_estandar import clear_screen
+from core.gestor_bd import consulta_a_df
+from core.gestor_archivos import carga_tabla_desde_df
 
 # ========================================================================
 #                               Constantes

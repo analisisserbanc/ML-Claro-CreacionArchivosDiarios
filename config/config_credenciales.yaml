@@ -1,0 +1,13 @@
+servidores:
+  15:
+    usuario: "nombre_usuario" # Colocar nombre de usuario correspondiente
+    password: "contraseña" # Colocar contraseña correspondiente
+    default_database: "serbanc_gestion"
+  23:
+    usuario: "nombre_usuario" # Colocar nombre de usuario correspondiente
+    password: "contraseña" # Colocar contraseña correspondiente
+    default_database: "report_cartera"
+  72:
+    usuario: "nombre_usuario" # Colocar nombre de usuario correspondiente
+    password: "contraseña" # Colocar contraseña correspondiente
+    default_database: "CLARO"

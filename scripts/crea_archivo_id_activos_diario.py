@@ -6,12 +6,15 @@ import yaml
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
-from funciones_estandar import clear_screen
-from funciones_estandar import consulta_a_df
-from anonimizacion_rut import extrae_rut_a_ingresar, carga_rut, extrae_info_bd
-from cargar_archivos_bucket import cargar_archivo_en_s3
+from core.funciones_estandar import clear_screen
+from core.funciones_estandar import consulta_a_df
+from scripts.anonimizacion_rut import extrae_rut_a_ingresar, carga_rut, extrae_info_bd
+from scripts.cargar_archivos_bucket import cargar_archivo_en_s3
 
-with open('config.yaml', 'r') as file:
+BASE_DIR = Path(__file__).resolve().parent.parent
+CONFIG_FILE_PATH = BASE_DIR / 'config' / 'config.yaml'
+
+with open(CONFIG_FILE_PATH, 'r') as file:
     config = yaml.safe_load(file)
 
 output_dir = Path(config['paths']['output_dir'])

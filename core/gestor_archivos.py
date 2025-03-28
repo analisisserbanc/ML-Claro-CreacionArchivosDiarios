@@ -3,7 +3,7 @@ import shutil
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
-from gestor_bd import carga_datos_desde_csv
+from core.gestor_bd import carga_datos_desde_csv
 
 def carga_tabla_desde_df(df: pd.DataFrame, tabla_destino: str, rutas: dict = {}, limpiar: bool = False, servidor_destino: int = 23, base_destino: str = "report_cartera", mensaje_dev: bool = False):
     try:

@@ -7,7 +7,13 @@ import json
 import yaml
 from pathlib import Path
 
-with open('config.yaml', 'r') as file:
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+CONFIG_FILE_PATH = BASE_DIR / 'config' / 'config.yaml'
+
+
+
+with open(CONFIG_FILE_PATH, 'r') as file:
     config = yaml.safe_load(file)
 
 cred_file = config['credentials']['file']
