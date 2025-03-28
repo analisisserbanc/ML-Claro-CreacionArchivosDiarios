@@ -30,9 +30,9 @@ def generar_dias_mes_periodo(periodo: int) -> list[str]:
 def procesa_periodo(periodo: int, archivo: str = "todos"):
     clear_screen()
     lista_dias = generar_dias_mes_periodo(periodo)
-       
+  
     for dia in lista_dias:
-        
+        print(dia)
         if archivo in ["gestiones", "todos"]:
             generar_archivo_gestiones(dia)
         if archivo in ["pagos", "todos"]:
@@ -58,5 +58,5 @@ if __name__ == "__main__":
                         default="todos", help="Tipo de archivo a generar (por defecto genera todos)")
 
     args = parser.parse_args()
-    
+
     procesa_periodo(args.periodo, args.archivo)

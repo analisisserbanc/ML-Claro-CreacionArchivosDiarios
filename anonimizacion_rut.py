@@ -22,14 +22,18 @@ SEPARADOR = ";"
 #                               Funciones
 # ========================================================================
 
-def extrae_info_bd() -> pd.DataFrame:
+def extrae_info_bd(lista_rut:list) -> pd.DataFrame:
     """
     Extrae toda la información de la tabla ML_Claro_Homologacion desde la base de datos.
     
     Returns:
         pd.DataFrame: DataFrame con los datos extraídos de la base de datos.
     """
-    consulta = f"SELECT * FROM {TABLA_HOMOLOGACION}"
+    consulta = f"""
+        SELECT * 
+        FROM {TABLA_HOMOLOGACION}
+        WHERE RUT_DEUDOR IN ({", ".join([str(rut) for rut in lista_rut])})
+    """
     df = consulta_a_df(consulta)
 
     if df is None or df.empty:
@@ -47,7 +51,7 @@ def extrae_rut_a_ingresar(lista_rut: list) -> list:
     Returns:
         list: Lista de RUTs que deben ser ingresados.
     """
-    df_bd = extrae_info_bd()
+    df_bd = extrae_info_bd(lista_rut)
     
     if df_bd.empty:
         return list(set(lista_rut))
@@ -77,8 +81,7 @@ def carga_rut(lista_rut_carga: list):
         df_respaldo = consulta_a_df(consulta)
         
         # Generar ruta y nombre para el archivo de respaldo
-        fecha_ahora = datetime.now().strftime("%Y%m%d%H%M")
-        nombre_archivo_respaldo = f"homologacion_rut_{fecha_ahora}.csv"
+        nombre_archivo_respaldo = f"respaldo_homologacion.csv"
         ruta_archivo_respaldo = RESPALDO_PATH / nombre_archivo_respaldo
         
         # Guardar respaldo en CSV
@@ -98,4 +101,7 @@ def main():
     print(f"Largo: {len(lista)}")
 
 if __name__ == "__main__":
-    main()
+    main()    
+
+
+

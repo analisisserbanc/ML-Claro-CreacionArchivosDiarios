@@ -90,14 +90,13 @@ def extrae_df_pagos(fecha_inicio:str, fecha_fin:str):
     
 def anonimizacion_rut(df:pd.DataFrame):
     # Anonimizar RUTs
-    lista_rut_gestion = df["fld_cli"].to_list()
+    lista_rut_gestion:list = df["fld_cli"].unique().tolist()
     lista_rut_ingresar = extrae_rut_a_ingresar(lista_rut_gestion)
     
     if lista_rut_ingresar:
         carga_rut(lista_rut_ingresar)
         
-        
-    df_homologacion_rut = extrae_info_bd()
+    df_homologacion_rut = extrae_info_bd(lista_rut_gestion)
 
     resultado_df = df.merge(
         df_homologacion_rut,

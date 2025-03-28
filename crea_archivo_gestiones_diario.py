@@ -82,17 +82,16 @@ def obtener_tabla_gestiones(tabla):
 #                          Funciones Anonimizacion
 # ========================================================================
 
-def extrae_base_anonimizacion(df_gestiones:pd.DataFrame):
+def extrae_base_anonimizacion(lista_rut:list):
     debug_print(f"Extraccion de Base para anonimizar...", end="\r")
-    lista_ruts = df_gestiones["CLIRUT"].unique()
-    nuevos_ruts = extrae_rut_a_ingresar(lista_ruts)
+    nuevos_ruts = extrae_rut_a_ingresar(lista_rut)
 
     if nuevos_ruts:
         carga_rut(nuevos_ruts)
     
     inicio = time.time()
     
-    df_rut_homologados = extrae_info_bd()    
+    df_rut_homologados = extrae_info_bd(lista_rut)    
 
     fin = time.time()
     duracion = fin - inicio
@@ -157,7 +156,6 @@ def obtener_ultimo_dia_gestion_periodo(periodo):
     else:
         debug_print("No se encontró ningún día de gestión.")
         return None
-
 
 def extraccion_tablas_homologacion():
     debug_print(f"Extraccion de Tablas de Homologacion...", end="\r")
@@ -397,7 +395,12 @@ def generar_archivo_gestiones(dia_gestion:str = None):
     #                       Extrae Base de Anonimizacion
     # ========================================================================
 
-    df_rut_homologados = extrae_base_anonimizacion(df_gestiones)
+    lista_rut = df_gestiones["CLIRUT"].unique().tolist()
+
+    print(f"Total de RUTs a anonimizar: {len(lista_rut)}")
+    df_rut_homologados = extrae_base_anonimizacion(lista_rut)
+
+    print(f"Total de RUTs anonimizados: {df_rut_homologados.shape[0]}")
 
     # ========================================================================
     #                     Extracción de Tablas de Homologación

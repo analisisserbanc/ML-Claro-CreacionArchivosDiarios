@@ -137,6 +137,9 @@ def extrae_asignacion(fecha_proceso:str):
     , UPPER(CARGO_ACTIVACION_EQUIPO) AS comuna
     , CARTERA AS cartera
     , FECHA_PROCESO AS fecha_proceso
+    , CASE 
+      WHEN CARTERA = 'PREVENTIVA' THEN FECHA_RETIRO
+      ELSE CAST('19000101') AS DATE END AS FECHA_RETIRO
     FROM {base}.{tabla}
     WHERE 
         CLIRUT > 0 AND
@@ -145,6 +148,9 @@ def extrae_asignacion(fecha_proceso:str):
     ORDER BY CLIRUT
     """
     df = consulta_a_df(consulta, servidor=72, database=base)
+
+    if df is None:
+        df = pd.DataFrame()
     
     return df
 
@@ -160,24 +166,26 @@ def extrae_campana_vista():
     
     return df
 
-def extrae_homologacion_tramo():
+def extrae_homologacion_tramo(lista_rut:list):
     actualiza_tramo_edad()
     
-    consulta = """
+    consulta = f"""
     SELECT * 
     FROM ML_Claro_Homologacion_TramoEdad
+    WHERE RUT_DEUDOR IN ({", ".join([str(rut) for rut in lista_rut])})
     """
     
     df = consulta_a_df(consulta)
     
     return df
 
-def anonimizacion_rut(df_asignacion:pd.DataFrame):
-    lista_rut_gestion = df_asignacion["fld_cli"].to_list()
-    lista_rut_ingresar = extrae_rut_a_ingresar(lista_rut_gestion)
+def anonimizacion_rut(lista_rut:list):
+    lista_rut_ingresar = extrae_rut_a_ingresar(lista_rut)
+
     if lista_rut_ingresar:
         carga_rut(lista_rut_ingresar)
-    df_homologacion_rut = extrae_info_bd() 
+
+    df_homologacion_rut = extrae_info_bd(lista_rut) 
     
     return df_homologacion_rut
 
@@ -256,7 +264,8 @@ def genera_estructura_final(resultado_df:pd.DataFrame):
         "TRAMO_EDAD": "tramo_edad",
         "region": "region",
         "comuna": "comuna",
-        "cartera": "cartera"
+        "cartera": "cartera",
+        "FECHA_RETIRO": "fecha_retiro"
     }
    
     resultado_df = resultado_df[list(nueva_estructura.keys())].rename(columns=nueva_estructura)  
@@ -308,13 +317,15 @@ def crea_archivo_asignacion(fecha_proceso:str = None):
         #                           Actualiza Tabla Tramo Edad
         # ========================================================================
 
-        df_tramo = extrae_homologacion_tramo()
+        lista_rut = df_asignacion["fld_cli"].unique().tolist()
+
+        df_tramo = extrae_homologacion_tramo(lista_rut)
         
         # ========================================================================
         #                               Anonimización
         # ========================================================================
     
-        df_homologacion_rut = anonimizacion_rut(df_asignacion)
+        df_homologacion_rut = anonimizacion_rut(lista_rut)
 
         # ========================================================================
         #                               Combina Consultas
