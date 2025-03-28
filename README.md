@@ -1,42 +1,95 @@
-# ML-Claro-CreacionArchivosDiarios
+# 📦 ML-Claro-CreacionArchivosDiarios
 
-Este repositorio contiene una colección de scripts en Python diseñados para la generación diaria de archivos específicos para el proyecto ML-Claro. El proceso principal se lleva a cabo mediante el script `creacion_archivos_diarios.py`, que debe ejecutarse diariamente. Los archivos generados se cargan automáticamente en un bucket de Amazon S3, utilizando las credenciales proporcionadas en el archivo `config_credenciales.yaml`.
+Este repositorio contiene un conjunto de scripts en Python diseñados para automatizar la generación diaria de archivos utilizados en la operación de *Claro*, incluyendo asignaciones, gestiones, pagos e IDs activos. También contempla el anonimizado de datos sensibles y la carga automática a un bucket de S3.
 
-## Estructura del Repositorio
+---
 
-A continuación, se detallan los archivos y directorios principales del repositorio:
+## 🧽 Tabla de contenidos
 
-* `anonimizacion_rut.py`: Contiene funciones para anonimizar los RUTs presentes en los datos.
-* `cargar_archivos_bucket.py`: Maneja la carga de los archivos generados al bucket de S3.
-* `config.yaml`: Archivo de configuración con parámetros utilizados por los scripts.
-* `config_credenciales.yaml`: Archivo que almacena las credenciales necesarias para la conexión con S3 y las bases de datos del servidor.
-* `crea_archivo_asignacion_diario.py`: Genera el archivo diario de asignaciones.
-* `crea_archivo_gestiones_diario.py`: Genera el archivo diario de gestiones.
-* `crea_archivo_id_activos_diario.py`: Genera el archivo diario de IDs activos.
-* `crea_archivo_pagos_dia.py`: Genera el archivo diario de pagos.
-* `creacion_archivos_diarios.py`: Script principal que coordina la creación diaria de los archivos necesarios.
-* `funciones_estandar.py`: Contiene funciones auxiliares utilizadas en varios scripts.
-* `gestor_archivos.py`: Gestiona las operaciones relacionadas con archivos, como lectura y escritura.
-* `gestor_bd.py`: Maneja las conexiones y operaciones con la base de datos.
-* `simulacion_dias_anteriores.py`: Permite la simulación de la generación de archivos para días anteriores.
-* `utilidades.py`: Incluye funciones utilitarias adicionales.
+- [📦 Requisitos](#-requisitos)
+- [⚙️ Configuración](#⚙️-configuración)
+- [🚀 Ejecución](#-ejecución)
+- [📂 Estructura del repositorio](#-estructura-del-repositorio)
+- [📌 Notas adicionales](#-notas-adicionales)
 
-## Requisitos Previos
+---
 
-Antes de ejecutar los scripts, asegúrese de tener instaladas las siguientes dependencias:
+## 📦 Requisitos
 
-* Python 3.x
-* Bibliotecas adicionales listadas en `requirements.txt` (si corresponde)
+- Python 3.9 o superior
+- Las dependencias listadas en `requirements.txt`  
+  Puedes instalarlas con:
 
-Además, es necesario contar con el archivo `config_credenciales.yaml` en el directorio raíz del proyecto. Este archivo debe contener las credenciales necesarias para cargar los archivos generados en el bucket de S3, y también las credenciales apropiadas para la interacción con las bases de datos del servidor.
+```bash
+pip install -r requirements.txt
+```
 
-## Configuración de Credenciales
+---
 
-El archivo `config_credenciales.yaml` debe estructurarse de la siguiente manera:
+## ⚙️ Configuración
 
-```yaml
-servidores:
-  72:
-    usuario: "nombre_usuario" # Colocar nombre de usuario correspondiente
-    password: "contraseña" # Colocar contraseña correspondiente
-    default_database: "CLARO"
+Antes de ejecutar los scripts, asegúrate de tener configurados los siguientes archivos:
+
+### `config/config.yaml`
+Contiene parámetros como rutas de entrada/salida, fechas y opciones de ejecución.
+
+### `config/config_credenciales.yaml`
+Incluye credenciales para conexión con la base de datos y el bucket S3.  
+**⚠️ Este archivo no debe subirse al repositorio (agregado en `.gitignore`).**
+
+---
+
+## 🚀 Ejecución
+
+El flujo principal se ejecuta mediante el script:
+
+```bash
+python creacion_archivos_diarios.py
+```
+
+Este script:
+- Genera los archivos diarios (asignaciones, gestiones, pagos, IDs activos)
+- Anonimiza RUTs si corresponde
+- Sube los archivos generados a S3
+
+También puedes correr los scripts por separado desde la carpeta `scripts/` para tareas específicas o pruebas.
+
+---
+
+## 📂 Estructura del repositorio
+
+```bash
+ML-Claro-CreacionArchivosDiarios/
+│
+├── config/                         # Archivos de configuración
+│   ├── config.yaml
+│   ├── config_credenciales.yaml
+│   └── config_template.yaml       # Ejemplo de configuración
+│
+├── scripts/                        # Scripts ejecutables diarios
+│   ├── crea_archivo_asignacion_diario.py
+│   ├── crea_archivo_gestiones_diario.py
+│   ├── crea_archivo_pagos_dia.py
+│   ├── crea_archivo_id_activos_diario.py
+│   └── cargar_archivos_bucket.py
+│
+├── core/                           # Módulos reutilizables
+│   ├── gestor_archivos.py
+│   ├── gestor_bd.py
+│   ├── funciones_estandar.py
+│   └── utilidades.py
+│
+├── anonimizacion_rut.py           # Función de anonimización de RUTs
+├── creacion_archivos_diarios.py   # Script principal de orquestación
+├── simulacion_dias_anteriores.py  # Simulación de ejecución para fechas pasadas
+├── requirements.txt               # Dependencias del proyecto
+└── README.md                      # Este archivo
+```
+
+---
+
+## 📌 Notas adicionales
+
+- El proyecto está diseñado para ejecutarse una vez al día de forma automatizada (por ejemplo, mediante `cron` o `task scheduler`).
+- Puedes simular días anteriores con el script `simulacion_dias_anteriores.py`. (Solo en caso de emergencias, o situaciones puntuales)
+- La seguridad y anonimización de los datos sensibles está contemplada en `anonimizacion_rut.py`.
